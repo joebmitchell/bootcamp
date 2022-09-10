@@ -1,0 +1,58 @@
+---
+title: "Question 10"
+author: "Joe Mitchell"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+m1 <- aov(formula = count ~ spray, 
+          data = InsectSprays)
+```
+The overall effect of spray does appear to explain the variation in count (1-way ANOVA: F = 34.7, df = 5,66, P <0.001)
+
+```{r}
+boxplot(count ~ spray,  # create boxplot of count as a function of spray
+        data = InsectSprays,
+        xlab = "Spray",
+        ylab = "Insect Count",
+        main = "Insect Count by Spray")
+abline(h = mean(InsectSprays$count),  # add overall mean line to boxplot
+                lty = 2,
+                lwd = 2,
+                col = "red")
+
+hist(residuals(m1), prob = TRUE,  # create histogram of density of residuals from ANOVA
+     main = "Residuals of 1-Way ANOVA of \ncount ~ spray from InsectSprays")
+curve(dnorm(x, mean = mean(residuals(m1)), sd = sd(residuals(m1))), add = TRUE, col = "red") # Add curve of what Gaussian Residuals would be
+lines(density(residuals(m1)), col = "blue", lty = 3)  # add curve of test residuals
+legend(x =1, y = 0.15,  # add legend labeling lines
+       legend = c("Gaussain", "Residuals Density"),
+       lty = c(1,3),
+       col = c("red", "blue"))
+```
+Near the mean the residual density is higher than expected under Gaussian.
+Our residuals at +2 to +4 are a lot lower than would be expected.
+-7 to -10 and +7 to +10 are higher than we would expect. 
+The distribution is mostly symmetrical around the mean.
+There is a left skew to the histogram. 
+This suggests that the residuals don't follow a Gaussian distribution
+
+```{r}
+library(car)
+qqPlot(x = m1,
+       main = "qqPlot of 1-way ANOVA residuals") # Generate qqplot of residuals of 1-way ANOVA
+```
+There are quite a few point that veer off the line in the qqplot, especially between -1 to -0.25 and +0.25 and +1
+ This suggests that they don't follow a Gaussian distribution
+
+```{r}
+shapiro.test(residuals(m1)) 
+```
+This test provides evidence to support the above graphs evidence that the the
+residuals of the 1 way ANOVA violate our assumption of Gaussian residual distribution
+(Shapiro-Wilk: W = 0.96, p = 0.02)
